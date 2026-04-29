@@ -1,7 +1,7 @@
 import AppKit
 import simd
 
-/// Drag = move view.center by -deltaScreen / zoom (PLAN.md §6).
+/// Drag = move view.center by -deltaScreen / zoom.
 @MainActor
 final class PanTool: Tool {
     let id: ToolId = .pan

@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    /// No untitled window on launch — see PLAN.md §15.14.
+    /// No untitled window on launch.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
         false
     }

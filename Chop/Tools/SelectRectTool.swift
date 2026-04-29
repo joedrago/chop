@@ -1,7 +1,7 @@
 import AppKit
 import simd
 
-/// Drag a rectangle in image-space (PLAN.md §8). v1: replaces the existing
+/// Drag a rectangle in image-space. v1: replaces the existing
 /// selection; modifier keys for add/subtract come later.
 @MainActor
 final class SelectRectTool: Tool {

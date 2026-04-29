@@ -1,6 +1,6 @@
 import AppKit
 
-/// Action commit + undo wiring (PLAN.md §7). Stays as a thin layer over
+/// Action commit + undo wiring. Stays as a thin layer over
 /// NSUndoManager so Edit ▸ Undo/Redo dynamic labels come for free.
 extension ChopDocument {
     /// Apply an action and register undo/redo with NSUndoManager.
@@ -54,7 +54,7 @@ extension ChopDocument {
         }
     }
 
-    /// First-responder action: Edit ▸ Deselect (PLAN.md §9).
+    /// First-responder action: Edit ▸ Deselect.
     @objc func deselect(_ sender: Any?) {
         guard let model = self.model else { return }
         if case .none = model.selection { return }
@@ -87,7 +87,7 @@ extension ChopDocument {
         }
     }
 
-    /// First-responder action: Image ▸ Crop (PLAN.md §9).
+    /// First-responder action: Image ▸ Crop
     /// Disabled when there's no rect selection — see validateMenuItem(_:).
     @objc func cropImage(_ sender: Any?) {
         guard let model = self.model else { return }
@@ -95,7 +95,7 @@ extension ChopDocument {
         commit(CropAction(rect: r))
     }
 
-    /// First-responder action: Image ▸ Resize… (PLAN.md §9).
+    /// First-responder action: Image ▸ Resize…
     @objc func resizeImage(_ sender: Any?) {
         guard let model = self.model else { return }
         guard let parentWindow = windowControllers.first?.window else { return }

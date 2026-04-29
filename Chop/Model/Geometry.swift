@@ -1,7 +1,7 @@
 import CoreGraphics
 import simd
 
-/// Integer-aligned, image-space rectangle (PLAN.md §4).
+/// Integer-aligned, image-space rectangle.
 public struct IRect: Equatable, Hashable {
     public var x: Int
     public var y: Int

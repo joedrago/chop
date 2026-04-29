@@ -1,7 +1,7 @@
 import AppKit
 import simd
 
-/// Drag-vertically = continuous zoom anchored at the click point (PLAN.md §6).
+/// Drag-vertically = continuous zoom anchored at the click point
 /// A simple click zooms in by 2× (option-click zooms out).
 @MainActor
 final class ZoomTool: Tool {

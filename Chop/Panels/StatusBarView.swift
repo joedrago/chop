@@ -1,7 +1,7 @@
 import AppKit
 
 /// A thin status bar above the bottom of the document window: zoom %, image
-/// dimensions, cursor coords (Phase 2 / 3).
+/// dimensions, cursor coords.
 @MainActor
 final class StatusBarView: NSView {
     private let zoomLabel: NSTextField

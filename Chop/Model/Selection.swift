@@ -1,4 +1,4 @@
-/// Document-wide selection (PLAN.md §4).
+/// Document-wide selection.
 public enum Selection: Equatable {
     case none
     case rect(IRect)

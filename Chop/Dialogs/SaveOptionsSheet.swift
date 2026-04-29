@@ -1,7 +1,7 @@
 import AppKit
 
 /// Modal sheet shown after NSSavePanel returns, for format-specific encoder
-/// knobs (PLAN.md §9).
+/// knobs.
 @MainActor
 final class SaveOptionsSheet: NSWindowController {
     let format: SaveOptions.Format

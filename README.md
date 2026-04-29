@@ -4,7 +4,7 @@ A simple, fast, **macOS-only** image editor. CLI: `chop`. App name: `Chop`.
 
 Designed to feel like a native Mac app — built with AppKit, NSDocument, NSUndoManager, ImageIO, ColorSync, and Metal directly.
 
-See `PLAN.md` for the design and roadmap.
+See `AGENTS.md` for the project's invariants and a map of where things live.
 
 ## Build
 

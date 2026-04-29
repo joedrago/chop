@@ -1,6 +1,6 @@
 import AppKit
 
-/// Right sidebar — surfaces cursor position and selection rect (PLAN.md §6).
+/// Right sidebar — surfaces cursor position and selection rect.
 @MainActor
 final class InfoPaletteView: NSView {
     weak var document: Document?

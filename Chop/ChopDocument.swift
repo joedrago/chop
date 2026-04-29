@@ -2,7 +2,7 @@ import AppKit
 import ImageIO
 import UniformTypeIdentifiers
 
-/// AppKit shim that wraps the pure-Swift `Model.Document` (PLAN.md §3, §4).
+/// AppKit shim that wraps the pure-Swift `Model.Document`.
 final class ChopDocument: NSDocument {
     /// The pure-Swift data model. Set during `read(from:ofType:)`; never nil
     /// once a document has been opened.

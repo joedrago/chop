@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// Crops every layer to the active selection rectangle and updates document
-/// dimensions (PLAN.md §7). Reverts via a `DocumentSnapshot`.
+/// dimensions. Reverts via a `DocumentSnapshot`.
 @MainActor
 final class CropAction: Action {
     let label: String = "Crop"

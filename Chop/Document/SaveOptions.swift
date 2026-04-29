@@ -34,8 +34,8 @@ public struct SaveOptions {
 }
 
 /// Build the ImageIO option dictionary for a given format + SaveOptions.
-/// PLAN.md §9 lists the supported keys; subsampling and PNG compression level
-/// are not directly exposed by ImageIO and fall back to system defaults.
+/// Subsampling and PNG compression level are not directly exposed by ImageIO
+/// and fall back to system defaults.
 func imageIODestinationOptions(
     for format: SaveOptions.Format,
     options: SaveOptions

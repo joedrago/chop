@@ -3,7 +3,7 @@ import Foundation
 import simd
 
 /// Resize the entire document (every layer + canvas dims) with the chosen
-/// resampling filter (PLAN.md §7 / Phase 5). Reverts via DocumentSnapshot.
+/// resampling filter. Reverts via DocumentSnapshot.
 @MainActor
 final class ResizeAction: Action {
     let label: String = "Resize"

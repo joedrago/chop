@@ -2,7 +2,7 @@ import AppKit
 import simd
 
 /// Routes input events from the canvas to the active tool, and handles wheel
-/// zoom (zoom-around-cursor) and the spacebar pan-tool override (PLAN.md §6).
+/// zoom (zoom-around-cursor) and the spacebar pan-tool override.
 extension CanvasView {
     public override var acceptsFirstResponder: Bool { true }
 

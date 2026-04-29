@@ -2,7 +2,7 @@ import AppKit
 import Metal
 import simd
 
-/// Owns the document window and its canvas + chrome (PLAN.md §3, §6).
+/// Owns the document window and its canvas + chrome.
 @MainActor
 final class ChopWindowController: NSWindowController, NSWindowDelegate {
     let canvas: CanvasView

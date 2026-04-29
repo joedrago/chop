@@ -3,7 +3,7 @@ import ImageIO
 
 /// EXIF Orientation values (1…8) per the EXIF spec.
 /// ImageIO surfaces this via `kCGImagePropertyOrientation` but does NOT bake
-/// it into pixels. We do — see PLAN.md §5.
+/// it into pixels. We do.
 enum EXIFOrientation: Int {
     case up = 1
     case upMirrored = 2

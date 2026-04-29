@@ -1,7 +1,7 @@
 import AppKit
 import UniformTypeIdentifiers
 
-/// Drag-and-drop file URLs onto the canvas → open in Chop (PLAN.md §10).
+/// Drag-and-drop file URLs onto the canvas → open in Chop.
 extension CanvasView {
     func enableFileDrops() {
         registerForDraggedTypes([.fileURL])

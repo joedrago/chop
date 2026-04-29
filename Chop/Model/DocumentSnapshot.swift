@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// A complete snapshot of a Document's pixel state and dimensions, used by
-/// pixel-mutating actions to revert (PLAN.md §7).
+/// pixel-mutating actions to revert.
 public struct DocumentSnapshot {
     public let width: Int
     public let height: Int
@@ -26,7 +26,7 @@ extension Document {
     }
 
     /// Restore from a snapshot. Bumps `textureRevision` so renderers know to
-    /// re-upload (PLAN.md §6).
+    /// re-upload.
     public func restore(from snap: DocumentSnapshot) {
         self.setDimensions(width: snap.width, height: snap.height)
         // Map snapshot's per-layer images back onto the existing Layer

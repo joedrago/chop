@@ -10,7 +10,7 @@ public enum BlendMode {
 }
 
 /// One layer of an image document. v1 invariant: `layers.count == 1` and the
-/// layer's pixel buffer matches the document's `width × height`. (PLAN.md §4.)
+/// layer's pixel buffer matches the document's `width × height`.
 public struct Layer: Identifiable {
     public var id: LayerId
     public var name: String

@@ -1,6 +1,6 @@
 import AppKit
 
-/// Modal sheet for Image ▸ Resize (PLAN.md §9). Pixel-mode width/height OR
+/// Modal sheet for Image ▸ Resize. Pixel-mode width/height OR
 /// percentage-mode inputs, lock-aspect toggle, filter dropdown, live preview.
 @MainActor
 final class ResizeSheet: NSWindowController, NSTextFieldDelegate {

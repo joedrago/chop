@@ -3,7 +3,7 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-/// Encode `image` to a Data blob via CGImageDestination (PLAN.md §5, §9).
+/// Encode `image` to a Data blob via CGImageDestination.
 func encode(
     _ image: CGImage,
     format: SaveOptions.Format,

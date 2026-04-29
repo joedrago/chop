@@ -2,7 +2,7 @@ import Foundation
 import Metal
 import MetalKit
 
-/// Process-wide Metal device + command queue, lazily created. (PLAN.md §6.)
+/// Process-wide Metal device + command queue, lazily created.
 @MainActor
 enum MetalContext {
     static let device: MTLDevice? = MTLCreateSystemDefaultDevice()

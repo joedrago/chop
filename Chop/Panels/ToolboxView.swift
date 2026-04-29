@@ -1,6 +1,6 @@
 import AppKit
 
-/// Left sidebar with one button per registered tool (Phase 2 / 3).
+/// Left sidebar with one button per registered tool.
 @MainActor
 final class ToolboxView: NSView {
     weak var document: Document?

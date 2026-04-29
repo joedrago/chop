@@ -3,7 +3,7 @@ import Testing
 
 @testable import Chop
 
-@Suite("Phase 0 smoke")
+@Suite("smoke")
 struct SmokeTests {
     @Test("Bundle identifier is correct")
     func bundleIdentifier() {

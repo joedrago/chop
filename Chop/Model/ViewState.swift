@@ -1,6 +1,6 @@
 import simd
 
-/// Per-document camera state (PLAN.md §4, §6).
+/// Per-document camera state
 /// `zoom` = pixels-on-screen per image-pixel (1.0 = 100%).
 /// `center` = image-space coordinate at the viewport's center.
 public struct ViewState: Equatable {

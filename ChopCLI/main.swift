@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 // Tiny shim — hand URLs (or zero URLs) to NSWorkspace and exit. The OS
-// routes file URLs into the running Chop.app via AppleEvents (PLAN.md §10).
+// routes file URLs into the running Chop.app via AppleEvents
 
 let args = Array(CommandLine.arguments.dropFirst())
 let prog = (CommandLine.arguments.first as NSString?)?.lastPathComponent ?? "chop"

@@ -2,7 +2,7 @@ import AppKit
 import QuartzCore
 import simd
 
-/// CAShapeLayer overlay for the active selection (PLAN.md §6).
+/// CAShapeLayer overlay for the active selection.
 @MainActor
 final class MarchingAntsLayer: CALayer {
     private let dashed: CAShapeLayer = .init()

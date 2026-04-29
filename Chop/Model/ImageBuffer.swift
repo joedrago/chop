@@ -4,7 +4,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 /// Wraps a `CGImage` — the canonical pixel state. The CGImage carries its own
-/// color space; we never strip ICC on load (PLAN.md §5).
+/// color space; we never strip ICC on load.
 public struct ImageBuffer {
     public let cgImage: CGImage
 
@@ -17,7 +17,7 @@ public struct ImageBuffer {
     public var colorSpace: CGColorSpace? { cgImage.colorSpace }
 
     /// Decodes a CGImage from raw image data using ImageIO and bakes in the
-    /// EXIF Orientation if present (PLAN.md §5).
+    /// EXIF Orientation if present.
     public static func decode(from data: Data) throws -> ImageBuffer {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
             throw ChopError.decodeFailed

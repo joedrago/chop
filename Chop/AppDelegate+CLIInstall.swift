@@ -3,8 +3,8 @@ import Foundation
 import os
 
 extension AppDelegate {
-    /// Symlink the embedded `chop` CLI shim into `/usr/local/bin/chop`
-    /// (PLAN.md §10 / §15.19). Uses an authorization prompt via `osascript`
+    /// Symlink the embedded `chop` CLI shim into `/usr/local/bin/chop`.
+    /// Uses an authorization prompt via `osascript`
     /// since `/usr/local/bin/` typically isn't writable by the user.
     @objc func installCommandLineTool(_ sender: Any?) {
         guard let embedded = embeddedCLIPath() else {

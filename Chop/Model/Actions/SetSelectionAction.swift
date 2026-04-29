@@ -1,7 +1,6 @@
 import Foundation
 
 /// Replaces the document's selection. Reverts by restoring the prior value.
-/// (PLAN.md §7 / "Initial action set".)
 @MainActor
 final class SetSelectionAction: Action {
     let label: String = "Selection"

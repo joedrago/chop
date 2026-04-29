@@ -2,7 +2,7 @@ import AppKit
 import QuartzCore
 import simd
 
-/// Selection-overlay support on `CanvasView` (PLAN.md §6).
+/// Selection-overlay support on `CanvasView`
 ///
 /// The marching-ants layer is positioned in *backing-pixel* space (matching
 /// the MTKView's drawableSize). The CAShapeLayer's path is the selection

@@ -1,6 +1,6 @@
 import AppKit
 
-/// Minimal above-canvas toolbar (PLAN.md §15.21 / Phase 8). Open, Save,
+/// Minimal above-canvas toolbar. Open, Save,
 /// the three v1 tools, and view-mode shortcuts.
 @MainActor
 final class ChopToolbar: NSObject, NSToolbarDelegate {

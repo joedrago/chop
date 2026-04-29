@@ -1,6 +1,6 @@
 import AppKit
 
-/// Builds the application's main menu programmatically (PLAN.md §9).
+/// Builds the application's main menu programmatically
 /// No xib / storyboard files; everything lives in Swift.
 @MainActor
 final class MainMenuController {

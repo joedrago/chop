@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 import simd
 
-/// Pure-Swift data model — the AppKit `ChopDocument` wraps this (PLAN.md §3, §4).
+/// Pure-Swift data model — the AppKit `ChopDocument` wraps this.
 /// Distinct from `ChopDocument` (the NSDocument subclass).
 public final class Document {
     public private(set) var width: Int
@@ -29,8 +29,8 @@ public final class Document {
         self.textureRevision = 1
     }
 
-    /// Build a document from a single decoded image (PLAN.md §4 single-layer
-    /// invariant). The provided `name` is used as the Background layer's label.
+    /// Build a document from a single decoded image. The provided `name` is
+    /// used as the Background layer's label.
     public static func fromImage(_ image: CGImage, name: String = "Background") -> Document {
         let pixels = ImageBuffer(cgImage: image)
         let id = nextLayerId()
@@ -48,7 +48,7 @@ public final class Document {
         return LayerId(raw: nextLayerSeq)
     }
 
-    /// v1: a single layer's pixels = the composite. (PLAN.md §4.)
+    /// v1: a single layer's pixels = the composite.
     public func composite() -> CGImage {
         assert(layers.count == 1, "v1 invariant: exactly one layer.")
         return layers[0].pixels.cgImage

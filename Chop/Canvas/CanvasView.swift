@@ -5,7 +5,7 @@ import MetalKit
 import simd
 
 /// MTKView subclass that renders `document.composite()` as a textured quad with
-/// nearest-neighbor magnification (PLAN.md §6).
+/// nearest-neighbor magnification.
 @MainActor
 final class CanvasView: MTKView {
     weak var document: Document?
@@ -39,7 +39,7 @@ final class CanvasView: MTKView {
     }
 
     private func configure() {
-        // EDR-ready (PLAN.md §6).
+        // EDR-ready.
         colorPixelFormat = .rgba16Float
         framebufferOnly = false
         clearColor = MTLClearColor(red: 0.12, green: 0.12, blue: 0.12, alpha: 1.0)

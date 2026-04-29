@@ -3,7 +3,7 @@ import CoreGraphics
 import CoreImage
 import Foundation
 
-/// Pixel-level resize entry point — implements PLAN.md §5 / Phase 5.
+/// Pixel-level resize entry point.
 ///
 /// We dispatch by filter to one of three back-ends:
 ///   - `nearest`  → CGContext with `interpolationQuality = .none`
