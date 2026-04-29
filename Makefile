@@ -48,7 +48,7 @@ XCODEBUILD_TEST_FLAGS := \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO
 
-.PHONY: help generate build run log test lint format check clean icon install
+.PHONY: help generate generate_if_needed build run log test lint format check clean icon install
 
 help:
 	@printf "Chop — Make targets\n"
@@ -66,13 +66,24 @@ help:
 	@printf "  make install    Release build → quit running Chop → replace %s\n" "$(INSTALL_PATH)"
 	@printf "  make clean      remove build/ and the generated %s\n" "$(PROJECT)"
 
-# Auto-regenerate the .xcodeproj when project.yml changes.
+# File rule for the .xcodeproj. Make checks project.yml's timestamp against
+# the existing .xcodeproj — xcodegen only runs when project.yml is newer
+# (or the project doesn't exist yet).
 $(PROJECT): project.yml
 	$(XCODEGEN) generate --spec project.yml
 
-generate: $(PROJECT)
+# Internal phony — depended on by build/test/install. Re-uses the file rule
+# above, so this is effectively a "regenerate only when needed" hook for
+# everyday builds.
+generate_if_needed: $(PROJECT)
 
-build: $(PROJECT)
+# Public target — always regenerates. Run after adding, removing, or
+# renaming source files (project.yml's timestamp doesn't change for that,
+# so generate_if_needed alone won't notice).
+generate:
+	$(XCODEGEN) generate --spec project.yml
+
+build: generate_if_needed
 	$(XCODEBUILD) $(XCODEBUILD_FLAGS) build | tee $(DERIVED)/last-build.log | xcbeautify 2>/dev/null || true; \
 	test "$${PIPESTATUS[0]:-0}" = "0"
 
@@ -98,7 +109,7 @@ log: build
 	@( sleep 1; osascript -e 'tell application "Chop" to activate' >/dev/null 2>&1 ) & \
 	  exec "$(APP_PATH)/Contents/MacOS/Chop"
 
-test: $(PROJECT)
+test: generate_if_needed
 	$(XCODEBUILD) $(XCODEBUILD_TEST_FLAGS) test
 
 lint:
@@ -131,7 +142,7 @@ icon: Chop-master.png
 	iconutil -c icns Chop.iconset -o Resources/Chop.icns
 	@rm -rf Chop.iconset
 
-install: $(PROJECT)
+install: generate_if_needed
 	@printf "Building Release configuration...\n"
 	$(XCODEBUILD) $(XCODEBUILD_RELEASE_FLAGS) build | tee $(DERIVED)/last-install-build.log | xcbeautify 2>/dev/null || true; \
 	test "$${PIPESTATUS[0]:-0}" = "0"

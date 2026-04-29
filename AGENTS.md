@@ -39,6 +39,7 @@ The data-model `Document` (`Chop/Model/Document.swift`) is distinct from `ChopDo
 ## Invariants
 
 - **Never invoke `git` from the agent.** The harness blocks it; the maintainer owns all VCS. Reason from the working tree and the conversation, not from `git`.
+- **Drive builds through `make`, not raw `xcodebuild` / `xcodegen` / `swift-format`.** The Makefile encodes the destination, code-signing flags, and derived-data path that the project depends on; running the underlying tool by hand drifts from those. If a `make` target is missing or wrong for the task, fix the Makefile rather than bypassing it. Run `make generate` after adding, removing, or renaming source files — `make build` won't re-run xcodegen on its own.
 - **macOS 14 Sonoma minimum.** Apple Silicon dev; universal build for Intel compatibility.
 - **AppKit, programmatic.** No SwiftUI. No `.xib` / `.storyboard`. Menus, sheets, panels live in Swift source.
 - **The data model imports no AppKit.** `Chop/Model/` is pure, testable Swift. AppKit lives outside it.
