@@ -30,10 +30,11 @@ extension CanvasView {
     }
 
     private func rectInScreen(_ r: IRect, doc: Document) -> CGRect {
-        // Selection is in image coordinates with origin at top-left. Convert
-        // to screen-pixel coordinates (the AppKit-point space the overlay
-        // layer is sized in — see ensureAntsLayer below).
-        let viewport = SIMD2<Float>(Float(bounds.width), Float(bounds.height))
+        // CanvasMath operates in *backing pixels* (view.zoom is image-px-per-
+        // backing-px). Run the math against drawableSize, then divide by the
+        // backing scale factor to land in the point-space the CALayer uses.
+        let drawable = drawableSize
+        let viewport = SIMD2<Float>(Float(drawable.width), Float(drawable.height))
         let topLeft = CanvasMath.screen(
             SIMD2<Float>(Float(r.x), Float(r.y)),
             view: doc.view,
@@ -44,13 +45,12 @@ extension CanvasView {
             view: doc.view,
             viewportSize: viewport
         )
-        // Note: image-y grows downward, screen-y in points grows upward in AppKit
-        // when the layer is flipped. We flip the layer in ensureAntsLayer.
+        let bsf = CGFloat(window?.backingScaleFactor ?? 1)
         return CGRect(
-            x: CGFloat(min(topLeft.x, botRight.x)),
-            y: CGFloat(min(topLeft.y, botRight.y)),
-            width: CGFloat(abs(botRight.x - topLeft.x)),
-            height: CGFloat(abs(botRight.y - topLeft.y))
+            x: CGFloat(min(topLeft.x, botRight.x)) / bsf,
+            y: CGFloat(min(topLeft.y, botRight.y)) / bsf,
+            width: CGFloat(abs(botRight.x - topLeft.x)) / bsf,
+            height: CGFloat(abs(botRight.y - topLeft.y)) / bsf
         )
     }
 
