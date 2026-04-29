@@ -108,8 +108,12 @@ private let kShaderSource = """
             float lineWidthBacking = 1.0;
             float lineThreshold = 1.0 - (lineWidthBacking / u.zoom) * 2.0;
             if (edge >= lineThreshold) {
-                float t = smoothstep(lineThreshold, 1.0, edge) * gridOpacity * 0.5;
-                float3 line = float3(0.0, 0.0, 0.0);
+                // Invert the underlying color so the grid is visible against
+                // any image — pure black, pure white, or anything in between.
+                // (Pure 50% gray is its own inverse and will still vanish; in
+                // practice it doesn't matter for real image content.)
+                float t = smoothstep(lineThreshold, 1.0, edge) * gridOpacity;
+                float3 line = float3(1.0) - base.rgb;
                 base.rgb = mix(base.rgb, line, t);
             }
         }

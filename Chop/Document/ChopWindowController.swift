@@ -53,12 +53,16 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
         info.translatesAutoresizingMaskIntoConstraints = false
         statusBar = StatusBarView(frame: .zero)
         statusBar.translatesAutoresizingMaskIntoConstraints = false
-        scrollerH = NSScroller(frame: .zero)
+        // NSScroller infers its orientation from the initial frame's aspect
+        // ratio and locks it in for life. A zero frame makes it default to
+        // vertical, which left the horizontal scroller rendering as a tiny
+        // nub. Seed each with a frame whose long axis matches its role.
+        scrollerH = NSScroller(frame: NSRect(x: 0, y: 0, width: 100, height: 15))
         scrollerH.translatesAutoresizingMaskIntoConstraints = false
         scrollerH.scrollerStyle = .legacy
         scrollerH.controlSize = .regular
         scrollerH.knobStyle = .default
-        scrollerV = NSScroller(frame: .zero)
+        scrollerV = NSScroller(frame: NSRect(x: 0, y: 0, width: 15, height: 100))
         scrollerV.translatesAutoresizingMaskIntoConstraints = false
         scrollerV.scrollerStyle = .legacy
         scrollerV.controlSize = .regular

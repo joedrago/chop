@@ -24,7 +24,7 @@ final class ResizeSheet: NSWindowController, NSTextFieldDelegate {
 
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 360, height: 220),
-            styleMask: [.titled, .closable, .resizable],
+            styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
         )
@@ -96,38 +96,37 @@ final class ResizeSheet: NSWindowController, NSTextFieldDelegate {
 
     private func layout(in panel: NSPanel) {
         guard let content = panel.contentView else { return }
+
         let modeRow = NSStackView(views: [modePixels, modePercent])
         modeRow.orientation = .horizontal
         modeRow.spacing = 12
 
-        let widthLabel = NSTextField(labelWithString: "Width:")
-        let heightLabel = NSTextField(labelWithString: "Height:")
-        widthLabel.alignment = .right
-        heightLabel.alignment = .right
-
-        let widthRow = NSStackView(views: [widthLabel, widthField])
-        widthRow.orientation = .horizontal
-        widthRow.spacing = 8
-        let heightRow = NSStackView(views: [heightLabel, heightField])
-        heightRow.orientation = .horizontal
-        heightRow.spacing = 8
-        widthLabel.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        heightLabel.widthAnchor.constraint(equalToConstant: 60).isActive = true
         widthField.widthAnchor.constraint(equalToConstant: 100).isActive = true
         heightField.widthAnchor.constraint(equalToConstant: 100).isActive = true
 
+        let widthLabel = NSTextField(labelWithString: "Width:")
+        let heightLabel = NSTextField(labelWithString: "Height:")
         let filterLabel = NSTextField(labelWithString: "Filter:")
-        filterLabel.alignment = .right
-        filterLabel.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        let filterRow = NSStackView(views: [filterLabel, filterPopup])
-        filterRow.orientation = .horizontal
-        filterRow.spacing = 8
+
+        // Grid keeps label column right-aligned and control column
+        // left-aligned, instead of the ragged-edge look of stacked rows.
+        let formGrid = NSGridView(views: [
+            [widthLabel, widthField],
+            [heightLabel, heightField],
+            [NSGridCell.emptyContentView, lockToggle],
+            [filterLabel, filterPopup],
+        ])
+        formGrid.column(at: 0).xPlacement = .trailing
+        formGrid.column(at: 1).xPlacement = .leading
+        formGrid.rowSpacing = 8
+        formGrid.columnSpacing = 8
 
         let cancelButton = NSButton(
             title: "Cancel",
             target: self,
             action: #selector(cancel(_:))
         )
+        cancelButton.keyEquivalent = "\u{1b}"
         let okButton = NSButton(
             title: "OK",
             target: self,
@@ -141,25 +140,31 @@ final class ResizeSheet: NSWindowController, NSTextFieldDelegate {
 
         let stack = NSStackView(views: [
             modeRow,
-            widthRow,
-            heightRow,
-            lockToggle,
-            filterRow,
+            formGrid,
             preview,
             buttonRow,
         ])
         stack.orientation = .vertical
         stack.alignment = .trailing
-        stack.spacing = 12
-        stack.edgeInsets = NSEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        stack.spacing = 14
         stack.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(stack)
+
+        let margin: CGFloat = 20
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: content.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: margin),
+            stack.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -margin),
+            stack.topAnchor.constraint(equalTo: content.topAnchor, constant: margin),
+            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -margin),
         ])
+
+        // Shrink the fixed (non-resizable) panel to its content's natural size.
+        panel.layoutIfNeeded()
+        let fitting = stack.fittingSize
+        panel.setContentSize(NSSize(
+            width: fitting.width + margin * 2,
+            height: fitting.height + margin * 2
+        ))
     }
 
     // MARK: - Buttons
