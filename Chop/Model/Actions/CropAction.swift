@@ -41,14 +41,10 @@ final class CropAction: Action {
     }
 
     private func cropPixels(_ buffer: ImageBuffer, to r: IRect) throws -> ImageBuffer {
-        // CGImage origin is bottom-left; our IRect is top-left. Flip y.
-        let srcH = buffer.cgImage.height
-        let srcRect = CGRect(
-            x: r.x,
-            y: srcH - (r.y + r.height),
-            width: r.width,
-            height: r.height
-        )
+        // Project convention: pixel data is top-left aligned everywhere. CGImage
+        // stores rows top-down, and `cropping(to:)` interprets the rect in that
+        // same top-left pixel grid — so we pass the IRect through unmodified.
+        let srcRect = CGRect(x: r.x, y: r.y, width: r.width, height: r.height)
         guard let cropped = buffer.cgImage.cropping(to: srcRect) else {
             throw ChopError.cropFailed
         }

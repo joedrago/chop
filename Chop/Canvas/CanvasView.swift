@@ -13,18 +13,19 @@ final class CanvasView: MTKView {
     private var lastRevision: UInt64 = 0
     private var texture: MTLTexture?
 
-    /// True when an initial fit-to-window is queued. The fit can't always
-    /// happen on document-load because Auto Layout may not have given the
-    /// canvas a non-zero `drawableSize` yet — so we set this flag and let
-    /// `draw()` (which is only called once the drawable is valid) perform it.
-    private var initialFitPending: Bool = false
+    /// True when a fit-to-window is queued. The fit can't always happen
+    /// synchronously because Auto Layout may not have given the canvas a
+    /// non-zero `drawableSize` yet — so we set this flag and let `draw()`
+    /// (which is only called once the drawable is valid) perform it.
+    private var fitPending: Bool = false
 
-    /// Called by the WindowController after assigning `document`. Performs the
-    /// fit immediately if the canvas is already laid out; otherwise the next
-    /// `draw()` will do it.
-    func requestInitialFit() {
-        initialFitPending = true
-        performInitialFitIfPossible()
+    /// Request a re-fit: zoom-to-window and re-center on the image. Performs
+    /// it immediately if the canvas is already laid out; otherwise the next
+    /// `draw()` will do it. Used both on initial document load and after
+    /// dimension-changing actions like Crop or Resize.
+    func requestFitToWindow() {
+        fitPending = true
+        performFitIfPossible()
     }
 
     override init(frame frameRect: NSRect, device: MTLDevice?) {
@@ -62,7 +63,7 @@ final class CanvasView: MTKView {
     override func draw(_ dirtyRect: NSRect) {
         // Now that drawableSize is guaranteed non-zero (we wouldn't get here
         // otherwise), perform any pending fit-to-window.
-        performInitialFitIfPossible()
+        performFitIfPossible()
 
         guard
             let device = device,
@@ -163,8 +164,8 @@ final class CanvasView: MTKView {
     /// If a fit is pending and the canvas is laid out, set view.zoom to
     /// fill the canvas and re-center the camera on the image. Otherwise
     /// leave state alone.
-    private func performInitialFitIfPossible() {
-        guard initialFitPending, let doc = document else { return }
+    private func performFitIfPossible() {
+        guard fitPending, let doc = document else { return }
         let drawable = drawableSize
         guard drawable.width > 0, drawable.height > 0 else { return }
         let viewport = SIMD2<Float>(Float(drawable.width), Float(drawable.height))
@@ -172,7 +173,17 @@ final class CanvasView: MTKView {
         let fit = CanvasMath.fitZoom(imageSize: imageSize, viewportSize: viewport)
         doc.view.zoom = CanvasMath.clampZoom(fit)
         doc.view.center = imageSize * 0.5
-        initialFitPending = false
+        fitPending = false
+        // External callers (e.g. F key, post-crop refit) reach this path
+        // outside `draw()`, so the canvas needs an explicit redraw + overlay
+        // refresh — without this, the zoom changes silently. When called
+        // from inside `draw()` itself, the redundant `needsDisplay = true`
+        // is harmless.
+        needsDisplay = true
+        updateSelectionOverlay()
+        // Let the window controller refresh chrome (scrollers, status bar)
+        // now that we have a real zoom + center.
+        NotificationCenter.default.post(name: .chopViewDidChange, object: self)
     }
 }
 

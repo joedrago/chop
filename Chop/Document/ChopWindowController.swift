@@ -13,6 +13,7 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
     private let scrollerV: NSScroller
     private var viewObserver: NSObjectProtocol?
     private let toolbar = ChopToolbar()
+    private var lastKnownDimensions: (Int, Int)?
 
     /// UserDefaults key for the persisted document-window frame. We bypass
     /// NSWindow.setFrameAutosaveName because in our setup it wasn't reliably
@@ -136,7 +137,10 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
         }
         // Queue a fit-to-window. The canvas itself performs it once Auto Layout
         // has given it a real drawableSize.
-        canvas.requestInitialFit()
+        canvas.requestFitToWindow()
+        if let model = document.model {
+            lastKnownDimensions = (model.width, model.height)
+        }
 
         toolbar.windowController = self
         toolbar.install(on: window)
@@ -186,6 +190,16 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
     func documentDidUpdate() {
         canvas.documentDidChange()
         canvas.selectionDidChange()
+        // If the document's dimensions changed (Crop, Resize, undo/redo of
+        // either), re-fit so the new image fills the canvas instead of being
+        // off-center or zoomed to the old size.
+        if let model = (document as? ChopDocument)?.model {
+            let dims = (model.width, model.height)
+            if let prev = lastKnownDimensions, prev != dims {
+                canvas.requestFitToWindow()
+            }
+            lastKnownDimensions = dims
+        }
         refreshChrome()
     }
 
@@ -285,6 +299,20 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
         refreshChrome()
     }
 
+    // MARK: - Tools menu actions
+
+    @objc func selectToolRect(_ sender: Any?) { setActiveTool(.rectSelect) }
+    @objc func selectToolPan(_ sender: Any?) { setActiveTool(.pan) }
+    @objc func selectToolZoom(_ sender: Any?) { setActiveTool(.zoom) }
+
+    func setActiveTool(_ id: ToolId) {
+        guard let model = (document as? ChopDocument)?.model else { return }
+        model.activeToolId = id
+        toolbox.refresh()
+        canvas.documentDidChange()
+        canvas.invalidateCursor()
+    }
+
     // MARK: - View menu actions
 
     @objc func zoomIn(_ sender: Any?) { applyZoomFactor(2.0) }
@@ -294,15 +322,17 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
         applyZoom(to: 1.0, around: viewportCenterScreen(), model: model)
     }
     @objc func fitToWindow(_ sender: Any?) {
+        // Re-use the same code path as the initial fit so we get correct
+        // behaviour even if drawableSize is briefly zero.
+        canvas.requestFitToWindow()
+    }
+
+    @objc func centerImage(_ sender: Any?) {
         guard let model = (document as? ChopDocument)?.model else { return }
-        let canvasSize = canvas.drawableSize
-        let viewport = SIMD2<Float>(Float(canvasSize.width), Float(canvasSize.height))
         let imageSize = SIMD2<Float>(Float(model.width), Float(model.height))
-        let z = CanvasMath.fitZoom(imageSize: imageSize, viewportSize: viewport)
-        applyZoom(to: CanvasMath.clampZoom(z), around: viewport * 0.5, model: model)
         model.view.center = imageSize * 0.5
         canvas.documentDidChange()
-        refreshChrome()
+        NotificationCenter.default.post(name: .chopViewDidChange, object: canvas)
     }
 
     private func applyZoomFactor(_ factor: Float) {

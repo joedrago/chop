@@ -1,11 +1,13 @@
 # Chop — top-level developer commands.
 # All targets wrap xcodegen + xcodebuild + swift-format. Xcode IDE is never required.
 
-PROJECT     := Chop.xcodeproj
-SCHEME      := Chop
-CONFIG      := Debug
-DERIVED     := build
-APP_PATH    := $(DERIVED)/Build/Products/$(CONFIG)/Chop.app
+PROJECT      := Chop.xcodeproj
+SCHEME       := Chop
+CONFIG       := Debug
+DERIVED      := build
+APP_PATH     := $(DERIVED)/Build/Products/$(CONFIG)/Chop.app
+APP_RELEASE  := $(DERIVED)/Build/Products/Release/Chop.app
+INSTALL_PATH := /Applications/Chop.app
 
 XCODEBUILD  := xcodebuild
 XCODEGEN    := xcodegen
@@ -16,6 +18,16 @@ XCODEBUILD_FLAGS := \
   -project $(PROJECT) \
   -scheme $(SCHEME) \
   -configuration $(CONFIG) \
+  -derivedDataPath $(DERIVED) \
+  -destination "platform=macOS" \
+  CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO
+
+XCODEBUILD_RELEASE_FLAGS := \
+  -project $(PROJECT) \
+  -scheme $(SCHEME) \
+  -configuration Release \
   -derivedDataPath $(DERIVED) \
   -destination "platform=macOS" \
   CODE_SIGN_IDENTITY="-" \
@@ -36,7 +48,7 @@ XCODEBUILD_TEST_FLAGS := \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO
 
-.PHONY: help generate build run log test lint format check clean icon
+.PHONY: help generate build run log test lint format check clean icon install
 
 help:
 	@printf "Chop — Make targets\n"
@@ -51,6 +63,7 @@ help:
 	@printf "  make format     swift-format format --in-place\n"
 	@printf "  make check      lint + test (pre-commit gate)\n"
 	@printf "  make icon       sips/iconutil → Resources/Chop.icns from Chop-master.png\n"
+	@printf "  make install    Release build → quit running Chop → replace %s\n" "$(INSTALL_PATH)"
 	@printf "  make clean      remove build/ and the generated %s\n" "$(PROJECT)"
 
 # Auto-regenerate the .xcodeproj when project.yml changes.
@@ -112,6 +125,26 @@ icon: Chop-master.png
 	sips -z 1024 1024 Chop-master.png --out Chop.iconset/icon_512x512@2x.png  > /dev/null
 	iconutil -c icns Chop.iconset -o Resources/Chop.icns
 	@rm -rf Chop.iconset
+
+install: $(PROJECT)
+	@printf "Building Release configuration...\n"
+	$(XCODEBUILD) $(XCODEBUILD_RELEASE_FLAGS) build | tee $(DERIVED)/last-install-build.log | xcbeautify 2>/dev/null || true; \
+	test "$${PIPESTATUS[0]:-0}" = "0"
+	@if [ ! -d "$(APP_RELEASE)" ]; then \
+	  echo "Release build artifact not found at $(APP_RELEASE)"; exit 1; \
+	fi
+	@printf "Asking any running Chop to quit...\n"
+	@osascript -e 'tell application "Chop" to quit' 2>/dev/null || true
+	@# Wait briefly for the graceful quit, then SIGTERM anything still alive.
+	@for i in 1 2 3 4 5 6 7 8; do pgrep -x Chop >/dev/null || break; sleep 0.25; done
+	@pkill -x Chop 2>/dev/null || true
+	@if [ -d "$(INSTALL_PATH)" ]; then \
+	  printf "Removing existing %s\n" "$(INSTALL_PATH)"; \
+	  rm -rf "$(INSTALL_PATH)"; \
+	fi
+	@printf "Installing %s → %s\n" "$(APP_RELEASE)" "$(INSTALL_PATH)"
+	@cp -R "$(APP_RELEASE)" "$(INSTALL_PATH)"
+	@printf "Installed. Launch with: open %s\n" "$(INSTALL_PATH)"
 
 clean:
 	rm -rf $(DERIVED) $(PROJECT)

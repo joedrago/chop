@@ -27,6 +27,7 @@ final class PanTool: Tool {
         ctx.document.view.center.x -= dx / zoom
         ctx.document.view.center.y -= dy / zoom
         ctx.canvas?.documentDidChange()
+        NotificationCenter.default.post(name: .chopViewDidChange, object: ctx.canvas)
     }
 
     func mouseUp(_ event: NSEvent, ctx: ToolContext) {

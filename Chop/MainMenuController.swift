@@ -10,6 +10,7 @@ final class MainMenuController {
         main.addItem(makeFileMenu())
         main.addItem(makeEditMenu())
         main.addItem(makeImageMenu())
+        main.addItem(makeToolsMenu())
         main.addItem(makeViewMenu())
         main.addItem(makeWindowMenu())
         main.addItem(makeHelpMenu())
@@ -108,7 +109,7 @@ final class MainMenuController {
 
         menu.addItem(
             withTitle: "Save",
-            action: #selector(NSDocument.save(_:)),
+            action: Selector(("saveWithConfirm:")),
             keyEquivalent: "s"
         )
 
@@ -197,8 +198,34 @@ final class MainMenuController {
         menu.addItem(
             withTitle: "Crop",
             action: Selector(("cropImage:")),
-            keyEquivalent: ""
+            keyEquivalent: "k"
         )
+
+        item.submenu = menu
+        return item
+    }
+
+    private func makeToolsMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "Tools")
+
+        let entries: [(String, String, String)] = [
+            ("Hand", "selectToolPan:", "1"),
+            ("Zoom", "selectToolZoom:", "2"),
+            ("Rectangle Select", "selectToolRect:", "3"),
+        ]
+        for (title, sel, key) in entries {
+            let mi = menu.addItem(
+                withTitle: title,
+                action: Selector((sel)),
+                keyEquivalent: key
+            )
+            // Bare-key (un-modified) shortcuts. Actual key handling lives in
+            // CanvasView.keyDown (more reliable than NSMenu's empty-modifier
+            // performKeyEquivalent path); this keeps the visible hint in the
+            // menu in sync with what the canvas actually responds to.
+            mi.keyEquivalentModifierMask = []
+        }
 
         item.submenu = menu
         return item
@@ -226,11 +253,19 @@ final class MainMenuController {
             keyEquivalent: "1"
         )
 
-        menu.addItem(
+        let fit = menu.addItem(
             withTitle: "Fit to Window",
             action: Selector(("fitToWindow:")),
-            keyEquivalent: "0"
+            keyEquivalent: "f"
         )
+        fit.keyEquivalentModifierMask = []
+
+        let center = menu.addItem(
+            withTitle: "Center",
+            action: Selector(("centerImage:")),
+            keyEquivalent: "c"
+        )
+        center.keyEquivalentModifierMask = []
 
         menu.addItem(NSMenuItem.separator())
 

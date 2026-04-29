@@ -61,6 +61,32 @@ extension ChopDocument {
         commit(SetSelectionAction(prior: model.selection, new: .none))
     }
 
+    /// First-responder action: File ▸ Save with overwrite confirmation.
+    /// For first-save (no fileURL yet) this falls straight through to the
+    /// standard save flow, which presents the save panel.
+    @objc func saveWithConfirm(_ sender: Any?) {
+        guard fileURL != nil else {
+            save(sender)
+            return
+        }
+        let alert = NSAlert()
+        alert.messageText = "Overwrite “\(displayName ?? "this file")”?"
+        alert.informativeText = "The previous version of this file will be replaced."
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        let proceed: (NSApplication.ModalResponse) -> Void = { [weak self] response in
+            if response == .alertFirstButtonReturn {
+                self?.save(sender)
+            }
+        }
+        if let window = windowControllers.first?.window {
+            alert.beginSheetModal(for: window, completionHandler: proceed)
+        } else {
+            proceed(alert.runModal())
+        }
+    }
+
     /// First-responder action: Image ▸ Crop (PLAN.md §9).
     /// Disabled when there's no rect selection — see validateMenuItem(_:).
     @objc func cropImage(_ sender: Any?) {
@@ -95,6 +121,11 @@ extension ChopDocument {
         case Selector(("deselect:")):
             if let model = self.model, case .rect = model.selection { return true }
             return false
+        case Selector(("saveWithConfirm:")):
+            // Match NSDocument's stock Save validation: enabled only when
+            // there are unsaved changes (or no file yet, so a save panel is
+            // still useful).
+            return fileURL == nil || isDocumentEdited
         default:
             return super.validateMenuItem(menuItem)
         }

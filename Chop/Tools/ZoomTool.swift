@@ -65,6 +65,7 @@ final class ZoomTool: Tool {
         ctx.document.view.zoom = newZoom
         ctx.document.view.center = newCenter
         ctx.canvas?.documentDidChange()
+        NotificationCenter.default.post(name: .chopViewDidChange, object: ctx.canvas)
     }
 
     private func canvasPoint(_ event: NSEvent, in ctx: ToolContext) -> SIMD2<Float> {

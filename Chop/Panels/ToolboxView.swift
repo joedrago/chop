@@ -28,16 +28,22 @@ final class ToolboxView: NSView {
             stack.topAnchor.constraint(equalTo: topAnchor),
         ])
 
-        for (id, label) in [
-            (ToolId.rectSelect, "▭"),
-            (ToolId.pan, "✋"),
-            (ToolId.zoom, "🔍"),
+        for (id, label, key) in [
+            (ToolId.pan, "✋", "1"),
+            (ToolId.zoom, "🔍", "2"),
+            (ToolId.rectSelect, "▭", "3"),
         ] {
             let b = NSButton(title: label, target: self, action: #selector(toolPressed(_:)))
             b.bezelStyle = .smallSquare
             b.setButtonType(.toggle)
             b.tag = toolTag(id)
-            b.toolTip = ToolRegistry.shared.tool(for: id).displayName
+            let displayName = ToolRegistry.shared.tool(for: id).displayName
+            b.toolTip = "\(displayName) (\(key))"
+            b.wantsLayer = true
+            b.layer?.cornerRadius = 4
+            // Roomier hit target so the highlight has somewhere to read.
+            b.heightAnchor.constraint(equalToConstant: 28).isActive = true
+            b.widthAnchor.constraint(equalToConstant: 28).isActive = true
             buttons[id] = b
             stack.addArrangedSubview(b)
         }
@@ -50,7 +56,14 @@ final class ToolboxView: NSView {
     func refresh() {
         guard let doc = document else { return }
         for (id, btn) in buttons {
-            btn.state = (id == doc.activeToolId) ? .on : .off
+            let active = (id == doc.activeToolId)
+            btn.state = active ? .on : .off
+            btn.layer?.backgroundColor =
+                active
+                ? NSColor.controlAccentColor.withAlphaComponent(0.45).cgColor
+                : NSColor.clear.cgColor
+            btn.layer?.borderWidth = active ? 1.0 : 0.0
+            btn.layer?.borderColor = NSColor.controlAccentColor.cgColor
         }
     }
 

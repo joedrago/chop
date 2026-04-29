@@ -8,16 +8,23 @@ extension CanvasView {
 
     public override func mouseDown(with event: NSEvent) {
         updateCursorReadout(event: event)
+        stopAutoscroll()
         toolContext().map { activeTool().mouseDown(event, ctx: $0) }
     }
 
     public override func mouseDragged(with event: NSEvent) {
         updateCursorReadout(event: event)
         toolContext().map { activeTool().mouseDragged(event, ctx: $0) }
+        if activeTool().id == .rectSelect {
+            updateAutoscroll(for: event)
+        } else {
+            stopAutoscroll()
+        }
     }
 
     public override func mouseUp(with event: NSEvent) {
         updateCursorReadout(event: event)
+        stopAutoscroll()
         toolContext().map { activeTool().mouseUp(event, ctx: $0) }
     }
 
@@ -67,7 +74,42 @@ extension CanvasView {
             invalidateCursor()
             return
         }
+        // Bare-key shortcuts (no modifiers) for tools and view actions.
+        let bareKey =
+            event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty
+        if bareKey, let chars = event.charactersIgnoringModifiers,
+            handleBareShortcut(chars)
+        {
+            return
+        }
         toolContext().map { activeTool().keyDown(event, ctx: $0) }
+    }
+
+    private func handleBareShortcut(_ chars: String) -> Bool {
+        let wc = window?.windowController as? ChopWindowController
+        if let id = toolIdForShortcut(chars) {
+            wc?.setActiveTool(id)
+            return true
+        }
+        switch chars {
+        case "f", "F":
+            wc?.fitToWindow(nil)
+            return true
+        case "c", "C":
+            wc?.centerImage(nil)
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func toolIdForShortcut(_ chars: String) -> ToolId? {
+        switch chars {
+        case "1": return .pan
+        case "2": return .zoom
+        case "3": return .rectSelect
+        default: return nil
+        }
     }
 
     public override func keyUp(with event: NSEvent) {

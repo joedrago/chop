@@ -53,11 +53,13 @@ final class StatusBarView: NSView {
     }
 
     func updateCursor(image point: SIMD2<Float>?) {
-        if let p = point {
-            cursorLabel.stringValue = String(format: "(%d, %d)", Int(p.x), Int(p.y))
-        } else {
+        guard let p = point, let doc = document else {
             cursorLabel.stringValue = ""
+            return
         }
+        let x = min(max(Int(p.x.rounded(.down)), 0), max(doc.width - 1, 0))
+        let y = min(max(Int(p.y.rounded(.down)), 0), max(doc.height - 1, 0))
+        cursorLabel.stringValue = String(format: "(%d, %d)", x, y)
     }
 
     private static func makeLabel() -> NSTextField {
