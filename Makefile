@@ -91,7 +91,12 @@ log: build
 	  echo "Build artifact not found at $(APP_PATH)"; exit 1; \
 	fi
 	@printf "Running %s in foreground (Cmd+Q to quit, Ctrl+C to terminate)\n" "$(APP_PATH)"
-	@"$(APP_PATH)/Contents/MacOS/Chop"
+	@# Launching the binary directly leaves Terminal frontmost. Fire a
+	@# background subshell that waits ~1s for the runloop to come up, then
+	@# asks WindowServer to bring Chop forward. The subshell runs in
+	@# parallel with the blocking exec below.
+	@( sleep 1; osascript -e 'tell application "Chop" to activate' >/dev/null 2>&1 ) & \
+	  exec "$(APP_PATH)/Contents/MacOS/Chop"
 
 test: $(PROJECT)
 	$(XCODEBUILD) $(XCODEBUILD_TEST_FLAGS) test
