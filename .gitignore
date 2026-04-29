@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Generated Xcode project
+Chop.xcodeproj/
+
+# Build outputs
+build/
+DerivedData/
+*.xcarchive
+*.app
+*.dSYM
+
+# SwiftPM (we don't use it, but be safe)
+.build/
+.swiftpm/
+Package.resolved
+
+# Editor noise
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Generated iconset
+Chop.iconset/
+Resources/Chop.icns

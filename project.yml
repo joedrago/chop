@@ -1,0 +1,169 @@
+name: Chop
+options:
+  bundleIdPrefix: com.joedrago
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ARCHS: "$(ARCHS_STANDARD)"
+    ONLY_ACTIVE_ARCH: NO
+    DEAD_CODE_STRIPPING: YES
+    CLANG_ENABLE_MODULES: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: NO
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  Chop:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Chop
+        excludes:
+          - "**/*.bak"
+      - path: Resources/Assets.xcassets
+        buildPhase: resources
+      - path: Resources/Chop.icns
+        buildPhase: resources
+        optional: true
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleName: Chop
+        CFBundleDisplayName: Chop
+        CFBundleIdentifier: com.joedrago.chop
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        CFBundlePackageType: APPL
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIconFile: Chop
+        LSMinimumSystemVersion: "14.0"
+        LSApplicationCategoryType: public.app-category.graphics-design
+        NSHumanReadableCopyright: "Copyright © 2026 Joe Drago. Dual MIT / Apache-2.0."
+        NSPrincipalClass: NSApplication
+        NSHighResolutionCapable: true
+        NSSupportsAutomaticTermination: false
+        NSSupportsSuddenTermination: false
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: PNG image
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Default
+            LSItemContentTypes: ["public.png"]
+            CFBundleTypeExtensions: ["png"]
+            NSDocumentClass: Chop.ChopDocument
+          - CFBundleTypeName: JPEG image
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Default
+            LSItemContentTypes: ["public.jpeg"]
+            CFBundleTypeExtensions: ["jpg", "jpeg", "jpe"]
+            NSDocumentClass: Chop.ChopDocument
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.joedrago.chop
+        PRODUCT_NAME: Chop
+        PRODUCT_MODULE_NAME: Chop
+        DEFINES_MODULE: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_TESTABILITY: YES
+    dependencies:
+      - target: ChopCLI
+        embed: false
+        link: false
+    preBuildScripts:
+      - name: swift-format lint
+        script: |
+          set -euo pipefail
+          if [ "${CONFIGURATION}" = "Release" ]; then
+            FMT="$(xcrun -f swift-format 2>/dev/null || true)"
+            if [ -n "$FMT" ]; then
+              "$FMT" lint --strict --recursive "${SRCROOT}/Chop" "${SRCROOT}/ChopCLI" "${SRCROOT}/ChopTests"
+            fi
+          fi
+        basedOnDependencyAnalysis: false
+    postBuildScripts:
+      # Embed the chop CLI shim into Contents/SharedSupport. We can't put it
+      # under Contents/MacOS because APFS is case-insensitive: the CLI's
+      # executable name `chop` would collide with the app's `Chop` binary.
+      - name: Embed chop CLI shim
+        script: |
+          set -euo pipefail
+          SRC="${BUILT_PRODUCTS_DIR}/chop"
+          DST_DIR="${TARGET_BUILD_DIR}/${WRAPPER_NAME}/Contents/SharedSupport"
+          if [ -f "$SRC" ]; then
+            mkdir -p "$DST_DIR"
+            cp -f "$SRC" "$DST_DIR/chop"
+            chmod +x "$DST_DIR/chop"
+          else
+            echo "warning: ChopCLI binary not found at $SRC"
+          fi
+        inputFiles:
+          - "$(BUILT_PRODUCTS_DIR)/chop"
+        outputFiles:
+          - "$(TARGET_BUILD_DIR)/$(WRAPPER_NAME)/Contents/SharedSupport/chop"
+
+  ChopCLI:
+    type: tool
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: ChopCLI
+    settings:
+      base:
+        PRODUCT_NAME: chop
+        SKIP_INSTALL: NO
+        INSTALL_PATH: "$(LOCAL_LIBRARY_DIR)/Chop"
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+
+  ChopTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: ChopTests
+    dependencies:
+      - target: Chop
+        link: false
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Chop.app/Contents/MacOS/Chop"
+        SWIFT_INCLUDE_PATHS: "$(OBJROOT)/Chop.build/$(CONFIGURATION)/Chop.build/Objects-normal/$(CURRENT_ARCH)"
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(BUILT_PRODUCTS_DIR)"
+          - "$(inherited)"
+
+schemes:
+  Chop:
+    build:
+      targets:
+        Chop: all
+        ChopCLI: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - ChopTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+  ChopCLI:
+    build:
+      targets:
+        ChopCLI: all
+    run:
+      config: Debug
