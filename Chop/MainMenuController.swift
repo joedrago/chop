@@ -184,7 +184,7 @@ final class MainMenuController {
 
         menu.addItem(
             withTitle: "Select All",
-            action: #selector(NSText.selectAll(_:)),
+            action: Selector(("selectAllImage:")),
             keyEquivalent: "a"
         )
 

@@ -87,6 +87,15 @@ extension ChopDocument {
         commit(SetSelectionAction(prior: model.selection, new: .none))
     }
 
+    /// First-responder action: Edit ▸ Select All — sets the rect selection
+    /// to the entire image extents.
+    @objc func selectAllImage(_ sender: Any?) {
+        guard let model = self.model else { return }
+        let full = IRect(x: 0, y: 0, width: model.width, height: model.height)
+        if case .rect(let cur) = model.selection, cur == full { return }
+        commit(SetSelectionAction(prior: model.selection, new: .rect(full)))
+    }
+
     /// First-responder action: File ▸ Save with overwrite confirmation.
     /// For first-save (no fileURL yet) this falls straight through to the
     /// standard save flow, which presents the save panel.
@@ -152,6 +161,8 @@ extension ChopDocument {
         case Selector(("deselect:")):
             if let model = self.model, case .rect = model.selection { return true }
             return false
+        case Selector(("selectAllImage:")):
+            return self.model != nil
         case Selector(("saveWithConfirm:")):
             // Match NSDocument's stock Save validation: enabled only when
             // there are unsaved changes (or no file yet, so a save panel is
