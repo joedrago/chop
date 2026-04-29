@@ -22,7 +22,3 @@ Package.resolved
 *~
 .idea/
 .vscode/
-
-# Generated iconset
-Chop.iconset/
-Resources/Chop.icns
