@@ -99,6 +99,21 @@ final class MainMenuController {
         // NSDocument types registered with NSDocumentClass. Don't add a
         // second one here.
 
+        let newFromClipboard = menu.addItem(
+            withTitle: "New from Clipboard",
+            action: #selector(AppDelegate.newFromClipboard(_:)),
+            keyEquivalent: "v"
+        )
+        newFromClipboard.target = NSApp.delegate
+        newFromClipboard.keyEquivalentModifierMask = [.command, .option]
+
+        let newFromSelection = menu.addItem(
+            withTitle: "New from Selection",
+            action: #selector(AppDelegate.newFromSelection(_:)),
+            keyEquivalent: ""
+        )
+        newFromSelection.target = NSApp.delegate
+
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(

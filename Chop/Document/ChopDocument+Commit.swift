@@ -54,6 +54,32 @@ extension ChopDocument {
         }
     }
 
+    /// First-responder action: Edit ▸ Copy. Writes the selected pixels to the
+    /// general pasteboard as PNG (preserves color space / alpha). No-op when
+    /// there's no active rect selection — see `validateMenuItem`.
+    @objc func copy(_ sender: Any?) {
+        guard let model = self.model else { return }
+        guard case .rect(let r) = model.selection else { return }
+        let clamped = r.clamped(toImageWidth: model.width, height: model.height)
+        guard !clamped.isEmpty else { return }
+        let cropRect = CGRect(
+            x: clamped.x,
+            y: clamped.y,
+            width: clamped.width,
+            height: clamped.height
+        )
+        guard let cropped = model.composite().cropping(to: cropRect) else { return }
+        do {
+            let png = try encode(cropped, format: .png, options: SaveOptions())
+            let pb = NSPasteboard.general
+            pb.clearContents()
+            pb.setData(png, forType: .png)
+        } catch {
+            chopLog("Copy: PNG encode failed: \(error)")
+            NSSound.beep()
+        }
+    }
+
     /// First-responder action: Edit ▸ Deselect.
     @objc func deselect(_ sender: Any?) {
         guard let model = self.model else { return }
@@ -116,6 +142,11 @@ extension ChopDocument {
         case Selector(("cropImage:")):
             if let model = self.model, case .rect(let r) = model.selection, !r.isEmpty {
                 return true
+            }
+            return false
+        case #selector(copy(_:)):
+            if let model = self.model, case .rect(let r) = model.selection {
+                return !r.clamped(toImageWidth: model.width, height: model.height).isEmpty
             }
             return false
         case Selector(("deselect:")):

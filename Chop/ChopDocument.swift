@@ -27,6 +27,18 @@ final class ChopDocument: NSDocument {
         )
     }
 
+    /// Build an untitled document around an already-decoded `CGImage`. Used by
+    /// File ▸ New from Clipboard / Selection. The doc is marked dirty so closing
+    /// without saving prompts, and `fileType` defaults to PNG so the standard
+    /// save flow has a writable type to fall back on.
+    static func newUntitled(from image: CGImage) -> ChopDocument {
+        let doc = ChopDocument()
+        doc.model = Document.fromImage(image)
+        doc.fileType = "public.png"
+        doc.updateChangeCount(.changeDone)
+        return doc
+    }
+
     override func read(from data: Data, ofType typeName: String) throws {
         chopLog("read(from:ofType:\(typeName)) byteCount=\(data.count)")
         do {
