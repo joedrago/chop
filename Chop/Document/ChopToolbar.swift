@@ -1,15 +1,14 @@
 import AppKit
 
-/// Minimal above-canvas toolbar. Open, Save, and view-mode shortcuts.
-/// Tool selection lives in the side `ToolboxView`.
+/// Minimal above-canvas toolbar. View-mode shortcuts only.
+/// Tool selection lives in the side `ToolboxView`; file operations are in the
+/// File menu.
 @MainActor
 final class ChopToolbar: NSObject, NSToolbarDelegate {
     private static let identifier = NSToolbar.Identifier("ChopMainToolbar")
     weak var windowController: ChopWindowController?
 
     enum Item: String, CaseIterable {
-        case open
-        case save
         case zoomIn
         case zoomOut
         case actualSize
@@ -17,8 +16,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
 
         var title: String {
             switch self {
-            case .open: return "Open"
-            case .save: return "Save"
             case .zoomIn: return "Zoom In"
             case .zoomOut: return "Zoom Out"
             case .actualSize: return "100%"
@@ -28,8 +25,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
 
         var symbolName: String {
             switch self {
-            case .open: return "folder"
-            case .save: return "square.and.arrow.down"
             case .zoomIn: return "plus.magnifyingglass"
             case .zoomOut: return "minus.magnifyingglass"
             case .actualSize: return "1.square"
@@ -86,8 +81,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         [
-            Item.open.itemIdentifier,
-            Item.save.itemIdentifier,
             .flexibleSpace,
             Item.zoomOut.itemIdentifier,
             Item.actualSize.itemIdentifier,
@@ -103,10 +96,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
     @objc private func handleToolbarItem(_ sender: NSToolbarItem) {
         guard let item = Item.allCases.first(where: { $0.tag == sender.tag }) else { return }
         switch item {
-        case .open:
-            NSDocumentController.shared.openDocument(sender)
-        case .save:
-            (windowController?.document as? NSDocument)?.save(sender)
         case .zoomIn:
             windowController?.zoomIn(sender)
         case .zoomOut:
@@ -122,8 +111,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
 extension ChopToolbar.Item {
     var tag: Int {
         switch self {
-        case .open: return 1
-        case .save: return 2
         case .zoomIn: return 6
         case .zoomOut: return 7
         case .actualSize: return 8
