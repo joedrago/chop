@@ -1,7 +1,7 @@
 import AppKit
 
-/// Minimal above-canvas toolbar. Open, Save,
-/// the three v1 tools, and view-mode shortcuts.
+/// Minimal above-canvas toolbar. Open, Save, and view-mode shortcuts.
+/// Tool selection lives in the side `ToolboxView`.
 @MainActor
 final class ChopToolbar: NSObject, NSToolbarDelegate {
     private static let identifier = NSToolbar.Identifier("ChopMainToolbar")
@@ -10,9 +10,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
     enum Item: String, CaseIterable {
         case open
         case save
-        case toolRectSelect
-        case toolPan
-        case toolZoom
         case zoomIn
         case zoomOut
         case actualSize
@@ -22,9 +19,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
             switch self {
             case .open: return "Open"
             case .save: return "Save"
-            case .toolRectSelect: return "Select"
-            case .toolPan: return "Hand"
-            case .toolZoom: return "Zoom"
             case .zoomIn: return "Zoom In"
             case .zoomOut: return "Zoom Out"
             case .actualSize: return "100%"
@@ -36,9 +30,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
             switch self {
             case .open: return "folder"
             case .save: return "square.and.arrow.down"
-            case .toolRectSelect: return "rectangle.dashed"
-            case .toolPan: return "hand.raised"
-            case .toolZoom: return "magnifyingglass"
             case .zoomIn: return "plus.magnifyingglass"
             case .zoomOut: return "minus.magnifyingglass"
             case .actualSize: return "1.square"
@@ -97,10 +88,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
         [
             Item.open.itemIdentifier,
             Item.save.itemIdentifier,
-            .space,
-            Item.toolRectSelect.itemIdentifier,
-            Item.toolPan.itemIdentifier,
-            Item.toolZoom.itemIdentifier,
             .flexibleSpace,
             Item.zoomOut.itemIdentifier,
             Item.actualSize.itemIdentifier,
@@ -120,12 +107,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
             NSDocumentController.shared.openDocument(sender)
         case .save:
             (windowController?.document as? NSDocument)?.save(sender)
-        case .toolRectSelect:
-            setActiveTool(.rectSelect)
-        case .toolPan:
-            setActiveTool(.pan)
-        case .toolZoom:
-            setActiveTool(.zoom)
         case .zoomIn:
             windowController?.zoomIn(sender)
         case .zoomOut:
@@ -136,13 +117,6 @@ final class ChopToolbar: NSObject, NSToolbarDelegate {
             windowController?.fitToWindow(sender)
         }
     }
-
-    private func setActiveTool(_ id: ToolId) {
-        guard let model = (windowController?.document as? ChopDocument)?.model else { return }
-        model.activeToolId = id
-        windowController?.refreshChrome()
-        windowController?.canvas.invalidateCursor()
-    }
 }
 
 extension ChopToolbar.Item {
@@ -150,9 +124,6 @@ extension ChopToolbar.Item {
         switch self {
         case .open: return 1
         case .save: return 2
-        case .toolRectSelect: return 3
-        case .toolPan: return 4
-        case .toolZoom: return 5
         case .zoomIn: return 6
         case .zoomOut: return 7
         case .actualSize: return 8

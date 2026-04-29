@@ -130,34 +130,40 @@ extension CanvasView {
 
     public override func scrollWheel(with event: NSEvent) {
         guard let doc = document else { return }
-        let viewport = viewportSize()
-        let cursor = canvasPoint(of: event)
         // Pinch / multi-touch trackpad gestures use magnification(); plain
         // scroll wheels and trackpad two-finger scroll arrive here.
         // scrollingDeltaY > 0 = scroll up / wheel forward → zoom in.
         let dy = Float(event.scrollingDeltaY) * (event.hasPreciseScrollingDeltas ? 0.01 : 0.1)
-        let factor = expf(dy)
-        let newZoom = CanvasMath.clampZoom(doc.view.zoom * factor)
-        let newCenter = CanvasMath.centerForZoomAround(
-            cursor: cursor,
-            view: doc.view,
-            viewportSize: viewport,
-            newZoom: newZoom
-        )
-        doc.view.zoom = newZoom
-        doc.view.center = newCenter
-        documentDidChange()
-        NotificationCenter.default.post(name: .chopViewDidChange, object: self)
+        applyZoomAroundCursor(event: event, factor: expf(dy), doc: doc)
     }
 
     public override func magnify(with event: NSEvent) {
         guard let doc = document else { return }
+        applyZoomAroundCursor(event: event, factor: Float(1.0 + event.magnification), doc: doc)
+    }
+
+    /// Zoom around the cursor, except when the cursor is outside the image —
+    /// in that case pivot on the image center so the image doesn't slide away
+    /// under a zoom that's "aimed" at empty canvas.
+    private func applyZoomAroundCursor(event: NSEvent, factor: Float, doc: Document) {
         let viewport = viewportSize()
         let cursor = canvasPoint(of: event)
-        let factor = Float(1.0 + event.magnification)
+        let imagePt = CanvasMath.imageSpace(cursor, view: doc.view, viewportSize: viewport)
+        let imageW = Float(doc.width)
+        let imageH = Float(doc.height)
+        let pivot: SIMD2<Float>
+        if imagePt.x < 0 || imagePt.x > imageW || imagePt.y < 0 || imagePt.y > imageH {
+            pivot = CanvasMath.screen(
+                SIMD2<Float>(imageW * 0.5, imageH * 0.5),
+                view: doc.view,
+                viewportSize: viewport
+            )
+        } else {
+            pivot = cursor
+        }
         let newZoom = CanvasMath.clampZoom(doc.view.zoom * factor)
         let newCenter = CanvasMath.centerForZoomAround(
-            cursor: cursor,
+            cursor: pivot,
             view: doc.view,
             viewportSize: viewport,
             newZoom: newZoom
