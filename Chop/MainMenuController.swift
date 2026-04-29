@@ -210,8 +210,10 @@ final class MainMenuController {
             keyEquivalent: "r"
         )
 
+        menu.addItem(NSMenuItem.separator())
+
         menu.addItem(
-            withTitle: "Crop",
+            withTitle: "Crop to Selection",
             action: Selector(("cropImage:")),
             keyEquivalent: "k"
         )
