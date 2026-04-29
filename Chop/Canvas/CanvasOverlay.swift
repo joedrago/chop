@@ -69,6 +69,9 @@ extension CanvasView {
         // Use a *flipped* layer for screen math: y-down to match the math we
         // use elsewhere.
         layer.isGeometryFlipped = true
+        // Clip ants to the canvas viewport so the marching rect doesn't bleed
+        // over the side panels when the image extends past the canvas.
+        layer.masksToBounds = true
         host.addSublayer(layer)
         ants = layer
     }
