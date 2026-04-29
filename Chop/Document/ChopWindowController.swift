@@ -12,7 +12,6 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
     private let scrollerH: NSScroller
     private let scrollerV: NSScroller
     private var viewObserver: NSObjectProtocol?
-    private let toolbar = ChopToolbar()
     private var lastKnownDimensions: (Int, Int)?
 
     /// UserDefaults key for the persisted document-window frame. We bypass
@@ -145,9 +144,6 @@ final class ChopWindowController: NSWindowController, NSWindowDelegate {
         if let model = document.model {
             lastKnownDimensions = (model.width, model.height)
         }
-
-        toolbar.windowController = self
-        toolbar.install(on: window)
 
         scrollerH.target = self
         scrollerH.action = #selector(horizontalScrollerChanged(_:))
