@@ -161,10 +161,12 @@ final class ResizeSheet: NSWindowController, NSTextFieldDelegate {
         // Shrink the fixed (non-resizable) panel to its content's natural size.
         panel.layoutIfNeeded()
         let fitting = stack.fittingSize
-        panel.setContentSize(NSSize(
-            width: fitting.width + margin * 2,
-            height: fitting.height + margin * 2
-        ))
+        panel.setContentSize(
+            NSSize(
+                width: fitting.width + margin * 2,
+                height: fitting.height + margin * 2
+            )
+        )
     }
 
     // MARK: - Buttons
